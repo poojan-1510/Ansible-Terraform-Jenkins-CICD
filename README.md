@@ -1,35 +1,41 @@
-Terraform & Ansible Jenkins Deployment
-This repository contains Terraform and Ansible configurations to provision infrastructure and deploy Jenkins on Docker.
-Prerequisites
-Terraform installed (Installation Guide)
-Ansible installed (Installation Guide)
-Access to a cloud provider (e.g., AWS)
-SSH access to the provisioned instances
-Terraform Workflow
-Navigate to the Terraform directory:
-cd terraform
-Initialize Terraform:
-terraform init
-Validate the configuration:
-terraform validate
-Format Terraform files (optional but recommended):
-terraform fmt
-Plan the infrastructure changes:
-terraform plan
-Apply the configuration:
-terraform apply -auto-approve
-Retrieve output values (e.g., instance IPs):
-terraform output
+# Terraform & Ansible Jenkins Deployment
 
-Ansible Workflow
-Navigate to the Ansible directory:
+This repository contains **Terraform and Ansible configurations** to provision infrastructure and deploy Jenkins on Docker.
+
+---
+
+## Prerequisites
+
+- Terraform installed ([Installation Guide](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli))  
+- Ansible installed ([Installation Guide](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html))  
+- Access to a cloud provider (e.g., AWS)  
+- SSH access to the provisioned instances  
+
+---
+
+## Terraform Workflow
+
+Navigate to the Terraform directory and run all commands:
+
+```bash
+cd terraform
+terraform init
+terraform validate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+terraform output
+terraform output -json > terraform_outputs.json
+
+---
+
+## Ansible Workflow
+
+Navigate to the Ansible directory, update inventory with Terraform outputs, and run all playbooks:
+
+```bash
 cd ../ansible
-Update the inventory file with the public IP of the instance created by Terraform.
-Run the Ansible playbooks in order:
 ansible-playbook bootstrap.yml
 ansible-playbook install-docker.yml
 ansible-playbook jenkins-docker.yml
-Notes
-Ensure SSH keys are properly configured so Ansible can connect to the instance.
-Jenkins will be accessible at the server’s public IP, default port 8080.
-If you make changes to the Terraform configuration, rerun terraform apply to update resources.
+
