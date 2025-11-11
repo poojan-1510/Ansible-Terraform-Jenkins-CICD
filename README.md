@@ -13,9 +13,14 @@ This repository contains **Terraform and Ansible configurations** to provision i
 
 ---
 
-## Terraform Workflow
 
-Navigate to the Terraform directory and run all commands:
+
+## Terraform and ansible Workflow
+
+For terraform: Navigate to the Terraform directory and run all commands:
+
+For ansible : Navigate to the Ansible directory, update inventory ip with Terraform outputs ip , and run all playbooks:
+
 
 ```bash
 cd terraform
@@ -26,16 +31,11 @@ terraform plan
 terraform apply -auto-approve
 terraform output
 terraform output -json > terraform_outputs.json
-
----
-
-## Ansible Workflow
-
-Navigate to the Ansible directory, update inventory with Terraform outputs, and run all playbooks:
-
-```bash
 cd ../ansible
 ansible-playbook bootstrap.yml
 ansible-playbook install-docker.yml
 ansible-playbook jenkins-docker.yml
+
+
+
 
