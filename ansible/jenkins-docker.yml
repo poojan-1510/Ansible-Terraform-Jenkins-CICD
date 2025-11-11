@@ -1,0 +1,45 @@
+---
+- name: Install and run Jenkins in Docker
+  hosts: all
+  become: yes
+  vars:
+    jenkins_home: /opt/jenkins_home
+    jenkins_port: 8080
+    jenkins_image: jenkins/jenkins:lts
+
+  tasks:
+
+    - name: Create Jenkins data directory
+      file:
+        path: "{{ jenkins_home }}"
+        state: directory
+        owner: 1000
+        group: 1000
+        mode: '0755'
+
+    - name: Pull Jenkins Docker image
+      docker_image:
+        name: "{{ jenkins_image }}"
+        source: pull
+
+    - name: Run Jenkins container
+      docker_container:
+        name: jenkins
+        image: "{{ jenkins_image }}"
+        state: started
+        restart_policy: unless-stopped
+        published_ports:
+          - "{{ jenkins_port }}:8080"
+          - "50000:50000"
+        volumes:
+          - "{{ jenkins_home }}:/var/jenkins_home"
+
+    - name: Read Jenkins admin password
+      slurp:
+        src: /opt/jenkins_home/secrets/initialAdminPassword
+      register: jenkins_password_file
+
+    - name: Show Jenkins admin password
+      debug:
+        msg: "{{ jenkins_password_file.content | b64decode }}"
+

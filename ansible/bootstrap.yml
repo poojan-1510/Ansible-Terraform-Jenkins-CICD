@@ -1,0 +1,9 @@
+# bootstrap.yml
+---
+- hosts: all
+  become: true
+  gather_facts: yes
+
+  roles:
+    - update-packages
+    - add-ansible-user

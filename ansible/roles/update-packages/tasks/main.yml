@@ -1,0 +1,15 @@
+---
+# Update packages depending on package manager
+- name: Update apt-based systems
+  apt:
+    upgrade: dist
+    update_cache: yes
+  when: ansible_facts.packages is not defined and ansible_pkg_mgr == 'apt'
+  changed_when: false
+
+- name: Update dnf-based systems
+  dnf:
+    update_only: yes
+    update_cache: yes
+  when: ansible_pkg_mgr == 'dnf'
+  changed_when: false

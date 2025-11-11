@@ -1,0 +1,38 @@
+#/roles/add-ansible-user/tasks/main.yml
+- name: Ensure ansible user exists
+  user:
+    name: ansible
+    create_home: yes
+    shell: /bin/bash
+    state: present
+
+- name: Ensure .ssh directory exists for ansible user
+  file:
+    path: /home/ansible/.ssh
+    state: directory
+    owner: ansible
+    group: ansible
+    mode: "0700"
+
+- name: Install public key into authorized_keys (from control node)
+  authorized_key:
+    user: ansible
+    state: present
+    key: "{{ lookup('file', lookup_public_key_path) | trim }}"
+  vars:
+    lookup_public_key_path: "/Users/poojanshah/.ssh/ansible/id_ansible.pub"
+
+- name: Ensure ownership and perms for authorized_keys
+  file:
+    path: /home/ansible/.ssh/authorized_keys
+    owner: ansible
+    group: ansible
+    mode: "0600"
+
+- name: Copy sudoers file for ansible (passwordless sudo)
+  copy:
+    src: sudoer_ansible
+    dest: /etc/sudoers.d/ansible_sudoers
+    owner: root
+    group: root
+    mode: "0440"
