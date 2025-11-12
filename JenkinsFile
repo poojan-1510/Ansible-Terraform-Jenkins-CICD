@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+
+    tools {
+        // Install the Maven version configured as "maven-lts" in Jenkins tools.
+        maven "maven-lts"
+    }
+
+    stages {
+
+        stage('Build') {
+            steps {
+                // Get code from GitHub repository
+                git 'https://github.com/jenkins-docs/simple-java-maven-app.git'
+
+                // Run Maven build on a Unix agent
+                sh "mvn -B -DskipTests clean package"
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Run Maven tests on a Unix agent
+                sh "mvn test"
+            }
+            post {
+                // Record test results and archive the JAR file
+                success {
+                    junit '**/target/surefire-reports/TEST-*.xml'
+                    archiveArtifacts 'target/*.jar'
+                }
+            }
+        }
+
+    } 
+} 

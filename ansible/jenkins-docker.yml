@@ -52,13 +52,13 @@
       debug:
         msg: "GitHub SSH key added to {{ jenkins_home }}/.ssh/known_hosts"
 
-    # Check if local password file already exists
+ 
     - name: Check if local Jenkins password file exists
       stat:
         path: "{{ local_password_file }}"
       register: password_file_stat
 
-    # Wait for initialAdminPassword only if first run
+
     - name: Wait for Jenkins initialAdminPassword (first run only)
       wait_for:
         path: "{{ jenkins_home }}/secrets/initialAdminPassword"
@@ -66,27 +66,27 @@
         timeout: 120
       when: not password_file_stat.stat.exists
 
-    # Read admin password from Jenkins (first run only)
+
     - name: Read Jenkins admin password from target (first run only)
       slurp:
         src: "{{ jenkins_home }}/secrets/initialAdminPassword"
       register: jenkins_password_file
       when: not password_file_stat.stat.exists
 
-    # Save admin password locally (first run only)
+  
     - name: Save Jenkins admin password locally
       copy:
         content: "{{ jenkins_password_file.content | b64decode }}"
         dest: "{{ local_password_file }}"
       when: not password_file_stat.stat.exists
 
-    # Read stored password from local file (always)
+  
     - name: Read stored Jenkins password
       slurp:
         src: "{{ local_password_file }}"
       register: stored_password
 
-    # Show admin password
+
     - name: Show Jenkins admin password
       debug:
         msg: "{{ stored_password.content | b64decode | trim }}"
