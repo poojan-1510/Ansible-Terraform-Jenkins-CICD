@@ -1,0 +1,30 @@
+---
+- name: run bootstarp .yml and provison ansible user
+  hosts: all
+  become: true
+  gather_facts: yes
+  roles:
+    - update-packages
+    - add-ansible-user
+    - install-docker
+
+- name: configure jenkins
+  hosts: jenkins
+  become: true
+  gather_facts: yes
+  roles:
+    - jenkins-docker
+
+- name: configure nexus repo 
+  hosts: nexus
+  become: true
+  gather_facts: yes
+  roles:
+    - nexus-docker
+
+- name: configure sonarqube
+  hosts: sonarqube
+  become: true
+  gather_facts: yes
+  roles:
+    - sonarqube-docker
