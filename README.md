@@ -1,6 +1,6 @@
 # Terraform & Ansible Jenkins Deployment
 
-This repository contains **Terraform and Ansible configurations** to provision infrastructure and deploy Jenkins on Docker.
+This repository contains **Terraform and Ansible configurations** to provision infrastructure and deploy Jenkins , Nexus Repo , Sonarqube on Docker.
 
 ---
 
