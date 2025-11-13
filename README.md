@@ -15,27 +15,8 @@ Installing Docker.
 Running Jenkins, Nexus, and SonarQube as containers.
 Setting up SSH access and secure connectivity through the Bastion host.
 Configuring Jenkins with GitHub SSH keys and showing the initial admin password.
-🏗️ Architecture Diagram
-                     ┌────────────────────────────────┐
-                     │            AWS VPC              │
-                     │                                │
-   Public Subnet ────┼───────────────────────────────┼──────────────
-                     │   Bastion Host (EC2)          │
-                     │     ↳ Public IP: <bastion_ip> │
-                     │                                │
-                     │   Jenkins Server (EC2)         │
-                     │     ↳ Public IP: <jenkins_ip>  │
-                     │     ↳ Docker: Jenkins LTS      │
-                     │                                │
-   Private Subnet ───┼───────────────────────────────┼──────────────
-                     │   Nexus Repo (EC2)             │
-                     │     ↳ Private IP: <nexus_ip>   │
-                     │     ↳ Docker: Sonatype Nexus   │
-                     │                                │
-                     │   SonarQube Server (EC2)       │
-                     │     ↳ Private IP: <sonarqube_ip> │
-                     │     ↳ Docker: SonarQube CE     │
-                     └────────────────────────────────┘
+
+   
 
 ---
 
