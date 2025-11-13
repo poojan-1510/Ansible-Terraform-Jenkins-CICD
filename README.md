@@ -30,11 +30,14 @@ terraform fmt
 terraform plan
 terraform apply -auto-approve
 terraform output
-terraform output -json > terraform_outputs.json
+
+
 cd ../ansible
-ansible-playbook bootstrap.yml
-ansible-playbook install-docker.yml
-ansible-playbook jenkins-docker.yml
+
+first change the ip addresses from terraform outputs to inventory acordingly
+
+ansible-playbook provisions.yml
+
 
 
 
