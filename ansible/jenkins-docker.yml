@@ -2,91 +2,89 @@
 - name: Install and run Jenkins in Docker
   hosts: all
   become: yes
-  vars:
-    jenkins_home: /opt/jenkins_home
-    jenkins_port: 8080
-    jenkins_image: jenkins/jenkins:lts
-    local_password_file: ./jenkins_admin_password.txt  # stored on Ansible host
+  
+  roles:
+    - jenkins-docker
 
-  tasks:
+  # tasks:
 
-    - name: Create Jenkins data directory
-      file:
-        path: "{{ jenkins_home }}"
-        state: directory
-        owner: 1000
-        group: 1000
-        mode: '0755'
+  #   - name: Create Jenkins data directory
+  #     file:
+  #       path: "{{ jenkins_home }}"
+  #       state: directory
+  #       owner: 1000
+  #       group: 1000
+  #       mode: '0755'
 
-    - name: Pull Jenkins Docker image
-      docker_image:
-        name: "{{ jenkins_image }}"
-        source: pull
+  #   - name: Pull Jenkins Docker image
+  #     docker_image:
+  #       name: "{{ jenkins_image }}"
+  #       source: pull
 
-    - name: Run Jenkins container
-      docker_container:
-        name: jenkins
-        image: "{{ jenkins_image }}"
-        state: started
-        restart_policy: unless-stopped
-        published_ports:
-          - "{{ jenkins_port }}:8080"
-          - "50000:50000"
-        volumes:
-          - "{{ jenkins_home }}:/var/jenkins_home"
+  #   - name: Run Jenkins container
+  #     docker_container:
+  #       name: jenkins
+  #       image: "{{ jenkins_image }}"
+  #       state: started
+  #       restart_policy: unless-stopped
+  #       published_ports:
+  #         - "{{ jenkins_port }}:8080"
+  #         - "50000:50000"
+  #       volumes:
+  #         - "{{ jenkins_home }}:/var/jenkins_home"
 
-    - name: Ensure .ssh directory exists in Jenkins home
-      file:
-        path: "{{ jenkins_home }}/.ssh"
-        state: directory
-        mode: '0700'
-        owner: 1000
-        group: 1000
+  #   - name: Ensure .ssh directory exists in Jenkins home
+  #     file:
+  #       path: "{{ jenkins_home }}/.ssh"
+  #       state: directory
+  #       mode: '0700'
+  #       owner: 1000
+  #       group: 1000
 
-    - name: Add GitHub SSH host key to known_hosts
-      shell: ssh-keyscan github.com >> {{ jenkins_home }}/.ssh/known_hosts
-      args:
-        creates: "{{ jenkins_home }}/.ssh/known_hosts"
+  #   - name: Add GitHub SSH host key to known_hosts
+  #     shell: ssh-keyscan github.com >> {{ jenkins_home }}/.ssh/known_hosts
+  #     args:
+  #       creates: "{{ jenkins_home }}/.ssh/known_hosts"
 
-    - name: Show known_hosts confirmation
-      debug:
-        msg: "GitHub SSH key added to {{ jenkins_home }}/.ssh/known_hosts"
+  #   - name: Show known_hosts confirmation
+  #     debug:
+  #       msg: "GitHub SSH key added to {{ jenkins_home }}/.ssh/known_hosts"
 
  
-    - name: Check if local Jenkins password file exists
-      stat:
-        path: "{{ local_password_file }}"
-      register: password_file_stat
+  #   - name: Check if local Jenkins password file exists
+  #     stat:
+  #       path: "{{ local_password_file }}"
+  #     register: password_file_stat
 
 
-    - name: Wait for Jenkins initialAdminPassword (first run only)
-      wait_for:
-        path: "{{ jenkins_home }}/secrets/initialAdminPassword"
-        state: present
-        timeout: 120
-      when: not password_file_stat.stat.exists
+  #   - name: Wait for Jenkins initialAdminPassword (first run only)
+  #     wait_for:
+  #       path: "{{ jenkins_home }}/secrets/initialAdminPassword"
+  #       state: present
+  #       timeout: 120
+  #     when: not password_file_stat.stat.exists
 
 
-    - name: Read Jenkins admin password from target (first run only)
-      slurp:
-        src: "{{ jenkins_home }}/secrets/initialAdminPassword"
-      register: jenkins_password_file
-      when: not password_file_stat.stat.exists
-
-  
-    - name: Save Jenkins admin password locally
-      copy:
-        content: "{{ jenkins_password_file.content | b64decode }}"
-        dest: "{{ local_password_file }}"
-      when: not password_file_stat.stat.exists
+  #   - name: Read Jenkins admin password from target (first run only)
+  #     slurp:
+  #       src: "{{ jenkins_home }}/secrets/initialAdminPassword"
+  #     register: jenkins_password_file
+  #     when: not password_file_stat.stat.exists
 
   
-    - name: Read stored Jenkins password
-      slurp:
-        src: "{{ local_password_file }}"
-      register: stored_password
+  #   - name: Save Jenkins admin password locally
+  #     copy:
+  #       content: "{{ jenkins_password_file.content | b64decode }}"
+  #       dest: "{{ local_password_file }}"
+  #     when: not password_file_stat.stat.exists
+
+  
+  #   - name: Read stored Jenkins password
+  #     slurp:
+  #       src: "{{ local_password_file }}"
+  #     register: stored_password
 
 
-    - name: Show Jenkins admin password
-      debug:
-        msg: "{{ stored_password.content | b64decode | trim }}"
+  #   - name: Show Jenkins admin password
+  #     debug:
+  #       msg: "{{ stored_password.content | b64decode | trim }}"

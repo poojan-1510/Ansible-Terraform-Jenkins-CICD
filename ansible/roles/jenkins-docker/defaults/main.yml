@@ -1,0 +1,4 @@
+jenkins_home: /opt/jenkins_home
+jenkins_port: 8080
+jenkins_image: jenkins/jenkins:lts
+local_password_file: ./jenkins_admin_password.txt # stored on Ansible host
