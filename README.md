@@ -1,6 +1,41 @@
 # Terraform & Ansible Jenkins Deployment
 
-This repository contains **Terraform and Ansible configurations** to provision infrastructure and deploy Jenkins , Nexus Repo , Sonarqube on Docker.
+DevOps CI/CD Infrastructure — Terraform + Ansible + Docker
+Overview
+This project provisions and configures a complete CI/CD environment on AWS using Terraform and Ansible.
+The infrastructure is built with Terraform (Infrastructure as Code) and consists of 4 EC2 instances within a single VPC:
+Public Subnet:
+Bastion Host – used as a secure jump host for SSH access to private instances.
+Jenkins Server – runs Jenkins in a Docker container.
+Private Subnet:
+Nexus Repository – hosts artifacts using Nexus in a Docker container.
+SonarQube Server – runs code quality analysis with SonarQube in a Docker container.
+Ansible is used to configure all servers automatically after provisioning, including:
+Installing Docker.
+Running Jenkins, Nexus, and SonarQube as containers.
+Setting up SSH access and secure connectivity through the Bastion host.
+Configuring Jenkins with GitHub SSH keys and showing the initial admin password.
+🏗️ Architecture Diagram
+                     ┌────────────────────────────────┐
+                     │            AWS VPC              │
+                     │                                │
+   Public Subnet ────┼───────────────────────────────┼──────────────
+                     │   Bastion Host (EC2)          │
+                     │     ↳ Public IP: <bastion_ip> │
+                     │                                │
+                     │   Jenkins Server (EC2)         │
+                     │     ↳ Public IP: <jenkins_ip>  │
+                     │     ↳ Docker: Jenkins LTS      │
+                     │                                │
+   Private Subnet ───┼───────────────────────────────┼──────────────
+                     │   Nexus Repo (EC2)             │
+                     │     ↳ Private IP: <nexus_ip>   │
+                     │     ↳ Docker: Sonatype Nexus   │
+                     │                                │
+                     │   SonarQube Server (EC2)       │
+                     │     ↳ Private IP: <sonarqube_ip> │
+                     │     ↳ Docker: SonarQube CE     │
+                     └────────────────────────────────┘
 
 ---
 
