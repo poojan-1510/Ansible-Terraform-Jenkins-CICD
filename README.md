@@ -39,6 +39,9 @@ For ansible : Navigate to the Ansible directory, update inventory ip with Terraf
 
 
 ```bash
+
+aws configure
+
 cd terraform
 terraform init
 terraform validate
