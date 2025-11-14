@@ -5,7 +5,7 @@ resource "aws_instance" "nexus_server" {
   subnet_id              = aws_subnet.private.id
 
   root_block_device {
-    volume_size           = 8
+    volume_size           = 30
     volume_type           = "gp3" # General purpose SSD
     delete_on_termination = true
 

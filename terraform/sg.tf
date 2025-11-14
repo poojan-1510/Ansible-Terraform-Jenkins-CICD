@@ -1,7 +1,7 @@
 resource "aws_security_group" "jenkins" {
   name        = "jenkins-sg"
   description = "for jenkins in public subnet"
-  vpc_id      = aws_vpc.main.id 
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     description = "SSH from anywhere"
@@ -41,13 +41,19 @@ resource "aws_security_group" "bastion" {
 
   name        = "bastion-host-sg"
   description = "bastion host"
-  vpc_id      = aws_vpc.main.id 
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     description = "SSH from anywhere"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -59,7 +65,7 @@ resource "aws_security_group" "nexus" {
   name        = "nexus-sg"
   description = "nexus artifactory private subnet"
   vpc_id      = aws_vpc.main.id
-  
+
 
   ingress {
     description     = "SSH from Bastion"
@@ -70,12 +76,13 @@ resource "aws_security_group" "nexus" {
   }
 
   ingress {
-    description     = "Allow web access from Jenkins"
+    description     = "Allow web access from Bastion"
     from_port       = 8081
     to_port         = 8081
     protocol        = "tcp"
-    security_groups = [aws_security_group.jenkins.id]
+    security_groups = [aws_security_group.bastion.id]
   }
+
 
   egress {
     from_port   = 0
@@ -100,13 +107,12 @@ resource "aws_security_group" "sonarqube" {
   }
 
   ingress {
-    description     = "SonarQube Web Access (from Jenkins)"
+    description     = "Allow web access from Bastion"
     from_port       = 9000
     to_port         = 9000
     protocol        = "tcp"
-    security_groups = [aws_security_group.jenkins.id]
+    security_groups = [aws_security_group.bastion.id]
   }
-
   egress {
     from_port   = 0
     to_port     = 0

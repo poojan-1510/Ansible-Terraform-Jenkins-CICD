@@ -1,6 +1,16 @@
 ---
-- name: run bootstarp .yml and provison ansible user
-  hosts: all
+# 1. Copy SSH key to bastion
+- name: copy the pem file to bastion 
+  hosts: bastion
+  become: true
+  gather_facts: yes
+  roles:
+    - bastion
+
+# 2. Bootstrap ONLY bastion & jenkins first  
+# (because Nexus/Sonar can't be reached yet!)
+- name: bootstrap bastion and jenkins 
+  hosts: bastion, jenkins
   become: true
   gather_facts: yes
   roles:
@@ -8,6 +18,17 @@
     - add-ansible-user
     - install-docker
 
+# 3. Bootstrap private hosts (NOW ProxyJump works)
+- name: bootstrap nexus and sonarqube
+  hosts: nexus, sonarqube
+  become: true
+  gather_facts: yes
+  roles:
+    - update-packages
+    - add-ansible-user
+    - install-docker
+
+# 4. Configure Jenkins
 - name: configure jenkins
   hosts: jenkins
   become: true
@@ -15,6 +36,7 @@
   roles:
     - jenkins-docker
 
+# 5. Configure Nexus
 - name: configure nexus repo 
   hosts: nexus
   become: true
@@ -22,9 +44,12 @@
   roles:
     - nexus-docker
 
+# 6. Configure SonarQube
 - name: configure sonarqube
   hosts: sonarqube
   become: true
   gather_facts: yes
   roles:
     - sonarqube-docker
+
+
