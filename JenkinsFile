@@ -2,80 +2,92 @@ pipeline {
     agent any
 
     tools {
-        // Install the Maven version configured as "maven-lts" in Jenkins tools.
         maven "maven-lts"
     }
 
     environment {
-        SONARQUBE_ENV = 'MySonarQube'  // Name must match what you configured in Jenkins → SonarQube servers
-        NEXUS_CREDENTIALS = credentials('nexus-credentials')
-        NEXUS_URL = 'http://<your-nexus-host>:8081/repository/maven-releases/'
+        SONAR_HOST_URL = "http://10.0.2.190:9000"
+        SONAR_TOKEN = credentials('sonar-token')
+
+        NEXUS_REPO_URL = "http://10.0.2.51:8081/repository/maven-releases/"
+        NEXUS_CREDENTIALS = credentials('nexus-creds')
+
+        SONARQUBE_ENV = "sonarqube-server"
     }
 
     stages {
 
-        stage('Build') {
+        stage('Checkout') {
             steps {
-                // Get code from GitHub repository
-                git 'https://github.com/jenkins-docs/simple-java-maven-app.git'
-
-                // Run Maven build on a Unix agent
-                sh "mvn -B -DskipTests clean package"
+                git branch: 'main',
+                    url: 'https://github.com/jenkins-docs/simple-java-maven-app.git'
             }
         }
 
-        stage('Test') {
+        stage('Build (Compile Only)') {
             steps {
-                // Run Maven tests on a Unix agent
-                sh "mvn test"
-            }
-            post {
-                // Record test results and archive the JAR file
-                success {
-                    junit '**/target/surefire-reports/TEST-*.xml'
-                    archiveArtifacts 'target/*.jar'
-                }
+                sh "mvn clean compile"
             }
         }
+
         stage('SonarQube Analysis') {
             steps {
-                // Use the SonarQube environment configuration
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    // Run the SonarQube scanner via Maven
-                    sh "mvn sonar:sonar -Dsonar.projectKey=simple-java-app -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_AUTH_TOKEN}"
+                    sh """
+                        mvn sonar:sonar \
+                        -Dsonar.projectKey=simple-java-app \
+                        -Dsonar.host.url=${SONAR_HOST_URL} \
+                        -Dsonar.login=${SONAR_TOKEN}
+                    """
                 }
             }
         }
 
         stage('Quality Gate') {
             steps {
-                // Wait for SonarQube analysis and fail the build if Quality Gate fails
                 timeout(time: 2, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
         }
 
+        stage('Run Tests') {
+            steps {
+                sh "mvn test"
+            }
+            post {
+                success {
+                    junit '**/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('Package Artifact') {
+            steps {
+                sh "mvn package -DskipTests"
+                archiveArtifacts 'target/*.jar'
+            }
+        }
+
         stage('Deploy to Nexus') {
             steps {
-                // Deploy artifact using Maven deploy goal
                 sh """
                     mvn deploy \
                     -DskipTests \
-                    -Dnexus.url=${NEXUS_URL} \
-                    -Dnexus.user=${NEXUS_CREDENTIALS_USR} \
+                    -DaltDeploymentRepository=nexus-releases::default::${NEXUS_REPO_URL} \
+                    -Dnexus.username=${NEXUS_CREDENTIALS_USR} \
                     -Dnexus.password=${NEXUS_CREDENTIALS_PSW}
                 """
             }
         }
+    }
 
-    } 
-     post {
+    post {
         success {
-            echo " Build, Test, SonarQube, and Deployment to Nexus completed successfully!"
+            echo "Pipeline completed successfully!"
         }
         failure {
-            echo " Pipeline failed. Check logs for details."
+            echo "Pipeline failed. Check logs."
         }
     }
-} 
+}

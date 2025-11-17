@@ -1,4 +1,4 @@
-- name: Create Nexus data directory
+- name: Create Nexus data directory on host
   file:
     path: "{{ NEXUS_HOME }}"
     state: directory
@@ -6,12 +6,28 @@
     group: 1000
     mode: "0755"
 
-- name: Pull Nexus artifactory Docker image
+- name: Create Nexus log directory
+  file:
+    path: "{{ NEXUS_HOME }}/log"
+    state: directory
+    owner: 1000
+    group: 1000
+    mode: "0755"
+
+- name: Create Nexus tmp directory
+  file:
+    path: "{{ NEXUS_HOME }}/tmp"
+    state: directory
+    owner: 1000
+    group: 1000
+    mode: "0755"
+
+- name: Pull Nexus Docker image
   docker_image:
     name: "{{ NEXUS_IMAGE }}"
     source: pull
 
-- name: Run Nexus artifactory container
+- name: Run Nexus container
   docker_container:
     name: nexus
     image: "{{ NEXUS_IMAGE }}"
@@ -23,3 +39,41 @@
       - "{{ NEXUS_HOME }}:/nexus-data"
     env:
       INSTALL4J_ADD_VM_PARAMS: "-Xms1200m -Xmx1200m -XX:MaxDirectMemorySize=2g"
+    user: "1000:1000"
+
+# ----------------------------
+# PASSWORD HANDLING (like Jenkins)
+# ----------------------------
+
+- name: Check if local Nexus password file exists
+  stat:
+    path: "{{ local_password_file }}"
+  register: password_file_stat
+
+- name: Wait for Nexus admin.password (first run only)
+  wait_for:
+    path: "{{ NEXUS_HOME }}/admin.password"
+    state: present
+    timeout: 120
+  when: not password_file_stat.stat.exists
+
+- name: Read Nexus admin password from target (first run only)
+  slurp:
+    src: "{{ NEXUS_HOME }}/admin.password"
+  register: nexus_password_file
+  when: not password_file_stat.stat.exists
+
+- name: Save Nexus admin password locally
+  copy:
+    content: "{{ nexus_password_file.content | b64decode }}"
+    dest: "{{ local_password_file }}"
+  when: not password_file_stat.stat.exists
+
+- name: Read stored Nexus password
+  slurp:
+    src: "{{ local_password_file }}"
+  register: stored_password
+
+- name: Show Nexus admin password
+  debug:
+    msg: "Nexus admin password: {{ stored_password.content | b64decode | trim }}"

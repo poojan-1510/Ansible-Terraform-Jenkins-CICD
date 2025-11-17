@@ -1,3 +1,4 @@
 NEXUS_PORT: 8081
 NEXUS_IMAGE: sonatype/nexus3:3.86.2-alpine
 NEXUS_HOME: /var/nexus_artifactory
+local_password_file: "./nexus_admin_password.txt"

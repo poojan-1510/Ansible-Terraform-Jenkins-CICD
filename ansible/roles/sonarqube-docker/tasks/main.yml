@@ -1,18 +1,20 @@
-- name: Create sonarqube data directory
+- name: Create SonarQube data directory
   file:
     path: "{{ sonarqube_data }}"
     state: directory
     owner: 1000
     group: 1000
     mode: "0755"
-- name: Create sonarqube logs directory
+
+- name: Create SonarQube logs directory
   file:
     path: "{{ sonarqube_logs }}"
     state: directory
     owner: 1000
     group: 1000
     mode: "0755"
-- name: Create sonarqube extensions directory
+
+- name: Create SonarQube extensions directory
   file:
     path: "{{ sonarqube_extensions }}"
     state: directory
@@ -20,12 +22,12 @@
     group: 1000
     mode: "0755"
 
-- name: Pull sonarqube Docker image
+- name: Pull SonarQube Docker image
   docker_image:
     name: "{{ sonarqube_image }}"
     source: pull
 
-- name: Run sonarqube container
+- name: Run SonarQube container
   docker_container:
     name: sonarqube
     image: "{{ sonarqube_image }}"

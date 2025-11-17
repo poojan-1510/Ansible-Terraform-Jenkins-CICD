@@ -74,6 +74,12 @@ resource "aws_security_group" "nexus" {
     protocol        = "tcp"
     security_groups = [aws_security_group.bastion.id]
   }
+  ingress {
+    from_port       = 8081
+    to_port         = 8081
+    protocol        = "tcp"
+    security_groups = [aws_security_group.jenkins.id]
+  }
 
   ingress {
     description     = "Allow web access from Bastion"
@@ -104,6 +110,13 @@ resource "aws_security_group" "sonarqube" {
     to_port         = 22
     protocol        = "tcp"
     security_groups = [aws_security_group.bastion.id]
+  }
+  ingress {
+    description     = "Allow web access from Jenkins"
+    from_port       = 9000
+    to_port         = 9000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.jenkins.id]
   }
 
   ingress {

@@ -1,55 +1,64 @@
 ---
-# 1. Copy SSH key to bastion
-- name: copy the pem file to bastion 
-  hosts: bastion
+# 0
+- name: Start ssh-agent and add key locally
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Start ssh-agent and add key
+      shell: |
+        eval "$(ssh-agent -s)"
+        ssh-add ~/Downloads/Main-AWS.pem
+      register: ssh_agent
+      changed_when: false
+
+
+# 1. Copy SSH key to bastion (ubuntu login still valid)
+- name: Copy PEM key to bastion and kenkins
+  hosts: bastion , jenkins
   become: true
   gather_facts: yes
   roles:
     - bastion
 
-# 2. Bootstrap ONLY bastion & jenkins first  
-# (because Nexus/Sonar can't be reached yet!)
-- name: bootstrap bastion and jenkins 
-  hosts: bastion, jenkins
+# 2. Bootstrap ALL servers using ubuntu (DO NOT add ansible user yet)
+- name: Bootstrap all nodes using ubuntu
+  hosts: all
   become: true
   gather_facts: yes
   roles:
     - update-packages
-    - add-ansible-user
     - install-docker
 
-# 3. Bootstrap private hosts (NOW ProxyJump works)
-- name: bootstrap nexus and sonarqube
-  hosts: nexus, sonarqube
+# 3. NOW create the ansible user everywhere (all hosts are accessible)
+- name: Create ansible user everywhere
+  hosts: all
   become: true
   gather_facts: yes
   roles:
-    - update-packages
     - add-ansible-user
-    - install-docker
 
-# 4. Configure Jenkins
-- name: configure jenkins
+# 4. Switch your inventory to ansible_user=ansible after step 3 succeeds
+
+# 5. Configure Jenkins
+- name: Configure Jenkins
   hosts: jenkins
   become: true
   gather_facts: yes
   roles:
     - jenkins-docker
 
-# 5. Configure Nexus
-- name: configure nexus repo 
+# 6. Configure Nexus
+- name: Configure Nexus
   hosts: nexus
   become: true
   gather_facts: yes
   roles:
     - nexus-docker
 
-# 6. Configure SonarQube
-- name: configure sonarqube
+# 7. Configure SonarQube
+- name: Configure SonarQube
   hosts: sonarqube
   become: true
   gather_facts: yes
   roles:
     - sonarqube-docker
-
-
