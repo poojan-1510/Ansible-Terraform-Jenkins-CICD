@@ -1,3 +1,8 @@
+every working terminal should first do this in order to interact with servers
+
+eval "$(ssh-agent -s)"
+ssh-add path_to_.pem_file
+
 # Terraform & Ansible Jenkins Deployment
 
 DevOps CI/CD Infrastructure — Terraform + Ansible + Docker
