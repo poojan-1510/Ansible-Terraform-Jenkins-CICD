@@ -42,8 +42,6 @@
     user: "1000:1000"
 
 # ----------------------------
-# PASSWORD HANDLING (like Jenkins)
-# ----------------------------
 
 - name: Check if local Nexus password file exists
   stat:

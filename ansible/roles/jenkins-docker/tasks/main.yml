@@ -25,6 +25,11 @@
       - "50000:50000"
     volumes:
       - "{{ jenkins_home }}:/var/jenkins_home"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+- name: Ensure AWS CLI is installed inside Jenkins container
+  command: >
+    docker exec -u root jenkins bash -c "which aws || (apt-get update && apt-get install -y awscli)"
 
 - name: Ensure .ssh directory exists in Jenkins home
   file:

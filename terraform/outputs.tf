@@ -10,10 +10,17 @@ output "nexus_private_ip" {
 output "sonarqube_server_ip" {
   value = aws_instance.sonarqube_server.private_ip
 }
-output "private_subnet_cidr" {
-  value = aws_subnet.private.cidr_block
+output "ECR_REPO" {
+  description = "ECR repository URL for the app"
+  value       = "523026302352.dkr.ecr.us-east-2.amazonaws.com/project1-app"
 }
 
-output "private_subnet_gateway" {
-  value = cidrhost(aws_subnet.private.cidr_block, 1)
+output "CLUSTER_NAME" {
+  description = "ECS cluster name"
+  value       = aws_ecs_cluster.main.name
+}
+
+output "SERVICE_NAME" {
+  description = "ECS service name"
+  value       = aws_ecs_service.app_service.name
 }

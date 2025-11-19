@@ -25,7 +25,7 @@ variable "private_subnet_cidr" {
 variable "instance_type" {
   type        = string
   description = "instance type for ec2 vm"
-  default     = "t2.micro"
+  default     = "t2.medium"
 }
 
 variable "instance_ami" {
