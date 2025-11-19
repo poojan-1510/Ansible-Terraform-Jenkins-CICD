@@ -19,6 +19,8 @@ pipeline {
         NEXUS_URL      = "http://10.0.2.87:8081/repository/maven-releases/"
         ARTIFACT_ID    = "simple-java-maven-app"
         AWS_REGION     = "us-east-2"
+
+        IMAGE_TAG      = "${BUILD_NUMBER}"   // ← unique tag for each build
     }
 
     stages {
@@ -124,13 +126,12 @@ pipeline {
                     echo "Using JAR: ${jarFile}"
 
                     sh """
-                    # Create Dockerfile dynamically
                     echo 'FROM openjdk:17-jdk-slim
                     COPY ${jarFile} /app/${ARTIFACT_ID}.jar
-                    ENTRYPOINT [\"java\", \"-jar\", \"/app/${ARTIFACT_ID}.jar\"]' > Dockerfile
+                    ENTRYPOINT ["java", "-jar", "/app/${ARTIFACT_ID}.jar"]' > Dockerfile
 
-                    # Build Docker image
-                    docker build -t ${ECR_REPO}:latest .
+                    docker build -t ${ECR_REPO}:${IMAGE_TAG} .
+                    docker tag ${ECR_REPO}:${IMAGE_TAG} ${ECR_REPO}:latest
                     """
                 }
             }
@@ -143,6 +144,8 @@ pipeline {
                                                 passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     sh """
                     aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}
+
+                    docker push ${ECR_REPO}:${IMAGE_TAG}
                     docker push ${ECR_REPO}:latest
                     """
                 }
